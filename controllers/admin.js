@@ -14,7 +14,7 @@ exports.postAddProduct = (req, res, next) => {
   const imageUrl = req.body.imageUrl;
   const description = req.body.description;
 
-  const product = new Product(null, title, imageUrl, description, price);
+  const product = new Product(title, price, description, imageUrl);
 
   product
     .save()
@@ -73,15 +73,15 @@ exports.postEditProduct = (req, res, next) => {
   );
 
   updatedProduct
-  .update()
-  .then(() => {
-    console.log("Update successful");
-    res.redirect("/admin/products");
-  })
-  .catch((err) => {
-    console.log(err);
-    // Handle the error if needed
-  });
+    .update()
+    .then(() => {
+      console.log("Update successful");
+      res.redirect("/admin/products");
+    })
+    .catch((err) => {
+      console.log(err);
+      // Handle the error if needed
+    });
 };
 
 exports.postDeleteProduct = (req, res, next) => {
