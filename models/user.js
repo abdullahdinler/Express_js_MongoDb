@@ -31,7 +31,7 @@ class User {
     });
 
     let newQuantity = 1;
-    const updatedCartItems = [...this.cart.items];
+    const updatedCartItems = [...(this.cart?.items || [])]; // Eğer cart boşsa, items'ı boş bir array olarak alıyoruz. Eğer cart boş değilse, cart'ın items'larını alıyoruz.
 
     if (cartProductIndex >= 0) {
       newQuantity = this.cart.items[cartProductIndex].quantity + 1;
@@ -54,6 +54,81 @@ class User {
         { _id: new mongodb.ObjectId(this._id) },
         { $set: { cart: updatedCart } }
       );
+  }
+
+  getCart() {
+    const db = getDb();
+    // Burada productsIds array'ini oluşturuyoruz. Bu array'de sadece product'ların id'leri olacak.
+    const productIds = this.cart.items.map((i) => {
+      return i.productId;
+    });
+
+    // Burada productIds array'indeki id'lere sahip olan product'ları buluyoruz. Bu product'ları bulurken, quantity'lerini de ekliyoruz. Bunu da map ile yapıyoruz. Bu sayede, product'ın quantity'sini de eklemiş oluyoruz. Bunu da product'ın içine ekliyoruz.
+    return db
+      .collection("products")
+      .find({ _id: { $in: productIds } })
+      .toArray()
+      .then((products) => {
+        // products array'indeki her bir product için, quantity'lerini ekliyoruz.
+        return products.map((p) => {
+          return {
+            ...p,
+            quantity: this.cart.items.find((i) => {
+              // product'ın quantity'sini ekliyoruz.
+              return i.productId.toString() === p._id.toString(); // product'ın id'si ile cartItem'ın productId'si eşitse, o cartItem'ın quantity'sini döndürüyoruz.
+            }).quantity,
+          };
+        });
+      });
+  }
+
+  deleteItemFromCart(productId) {
+    const db = getDb();
+    const updatedCartItems = this.cart.items.filter((items) => {
+      return items.productId.toString() !== productId.toString();
+    });
+    return db
+      .collection("users")
+      .updateOne(
+        { _id: new mongodb.ObjectId(this._id) },
+        { $set: { cart: { items: updatedCartItems } } }
+      );
+  }
+
+  addOrder() {
+    const db = getDb();
+    return this.getCart()
+      .then((products) => {
+        const order = {
+          items: products,
+          user: {
+            _id: new mongodb.ObjectId(this._id),
+            name: this.name,
+          },
+        };
+        return db.collection("orders").insertOne(order);
+      })
+      .then(() => {
+        this.cart = { items: [] };
+        return db
+          .collection("users")
+          .updateOne(
+            { _id: new mongodb.ObjectId(this._id) },
+            { $set: { cart: { items: [] } } }
+          );
+      });
+  }
+
+  getOrder() {
+    const db = getDb();
+    return db
+      .collection("orders")
+      .find({"user._id": new mongodb.ObjectId(this._id)})
+      .toArray()
+      .then((orders) => {
+        return orders;
+      })
+      .catch((err) => console.log(err));
   }
 
   static findById(userId) {
