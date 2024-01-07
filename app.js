@@ -7,6 +7,7 @@ const adminRoutes = require("./routes/admin");
 const shopRoutes = require("./routes/shop");
 const errorController = require("./controllers/error");
 const mongoConnect = require("./util/database").mongoConnect;
+const User = require("./models/user");
 
 // Middleware - body-parser
 app.use(express.static(path.join(__dirname, "public"))); // to serve static files. css, js, images etc
@@ -18,13 +19,12 @@ app.set("views", "views"); // to set the views folder
 
 // User'ı request'e eklemek için kullanılan middleware. Bu sayede her request'te user'ı kullanabiliriz.
 app.use((req, res, next) => {
-  // User.findByPk(1)
-  //   .then((user) => {
-  //     req.user = user; // user'ı request'e ekledik.
-  //     next();
-  //   })
-  //   .catch((err) => console.log(err));
-  next();
+  User.findById('65897d4d88a1dda22aa6a577')
+    .then((user) => {
+      req.user = new User(user.name, user.email, user.cart, user._id);
+      next();
+    })
+    .catch((err) => console.log(err));
 });
 
 // Middleware - routes

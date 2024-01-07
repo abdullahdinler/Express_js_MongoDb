@@ -13,16 +13,22 @@ exports.postAddProduct = (req, res, next) => {
   const price = req.body.price;
   const imageUrl = req.body.imageUrl;
   const description = req.body.description;
+  const userId = req.user._id;
 
-  const product = new Product(title, price, description, imageUrl);
+  const product = new Product(
+    title,
+    price,
+    description,
+    imageUrl,
+    null,
+    userId
+  );
 
   product
     .save()
-    .then((result) => {
+    .then(() => {
       console.log("Created Product");
-      if (result) {
-        res.redirect("/admin/products");
-      }
+      res.redirect("/admin/products");
     })
     .catch((err) => console.log(err)); //Burada user'ın createProduct metodu ile product oluşturulur. Bu metot sequelize tarafından otomatik olarak oluşturulur.
 };
@@ -88,14 +94,10 @@ exports.postDeleteProduct = (req, res, next) => {
   const prodId = req.body.productId; //Burada productId ile gelen değer productId olarak alınır
 
   // Destroy metodu ile silme işlemi yapılır. Burada id'si prodId olan product silinir.
-  Product.destroy({ where: { id: prodId } })
-    .then((result) => {
-      if (result === 1) {
-        console.log("Deleted Product");
-        res.redirect("/admin/products");
-      } else {
-        console.log("Product not found");
-      }
+  Product.deleteById(prodId)
+    .then(() => {
+      console.log("Deleted Product");
+      res.redirect("/admin/products");
     })
     .catch((err) => {
       console.log(err);
