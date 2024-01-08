@@ -12,7 +12,7 @@
         <% prods.forEach(prods => { %>
         <article class="card product-item">
           <header class="card__header">
-            <h1 class="product__title"><%= prods.title %></h1>
+            <h1 class="product__title"><%= prods.title %> <%= prods.userId ? prods.userId.name : 'Unknown User' %></h1>
           </header>
           <div class="card__image">
             <img src="<%= prods.imageUrl %>" alt="<%= prods.title %>" />

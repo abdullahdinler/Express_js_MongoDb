@@ -13,16 +13,15 @@ exports.postAddProduct = (req, res, next) => {
   const price = req.body.price;
   const imageUrl = req.body.imageUrl;
   const description = req.body.description;
-  const userId = req.user._id;
+  const userId = req.user;
 
-  const product = new Product(
-    title,
-    price,
-    description,
-    imageUrl,
-    null,
-    userId
-  );
+  const product = new Product({
+    title: title,
+    price: price,
+    description: description,
+    imageUrl: imageUrl,
+    userId: userId,
+  });
 
   product
     .save()
@@ -34,8 +33,9 @@ exports.postAddProduct = (req, res, next) => {
 };
 
 exports.getProducts = (req, res, next) => {
-  Product.fetchAll()
+  Product.find().populate("userId", "name -_id") // populate ile userId'yi dolduruyoruz. İkinci parametre ile de name'i alıyoruz. _id'yi almamak için -_id yazıyoruz.
     .then((products) => {
+      console.log(products);
       res.render("admin/products", {
         prods: products,
         pageTitle: "Admin Products",
@@ -63,43 +63,40 @@ exports.getEditProduct = (req, res, next) => {
     .catch((err) => console.log(err));
 };
 
-exports.postEditProduct = (req, res, next) => {
-  const productId = req.body.productId;
-  const title = req.body.title;
-  const price = req.body.price;
-  const imageUrl = req.body.imageUrl;
-  const description = req.body.description;
+exports.postEditProduct = async (req, res, next) => {
+  try {
+    const productId = req.body.productId;
+    const title = req.body.title;
+    const price = req.body.price;
+    const imageUrl = req.body.imageUrl;
+    const description = req.body.description;
 
-  const updatedProduct = new Product(
-    title,
-    price,
-    description,
-    imageUrl,
-    productId
-  );
+    await Product.findByIdAndUpdate(
+      productId,
+      { title, price, description, imageUrl },
+      { new: true } // Bu, güncellenmiş belgeyi döndürmek için kullanılır
+    );
 
-  updatedProduct
-    .update()
-    .then(() => {
-      console.log("Update successful");
-      res.redirect("/admin/products");
-    })
-    .catch((err) => {
-      console.log(err);
-      // Handle the error if needed
-    });
+    console.log("Update successful");
+    res.redirect("/admin/products");
+  } catch (err) {
+    console.error(err);
+    // Handle the error if needed
+  }
 };
 
-exports.postDeleteProduct = (req, res, next) => {
-  const prodId = req.body.productId; //Burada productId ile gelen değer productId olarak alınır
+exports.postDeleteProduct = async (req, res, next) => {
+  try {
+    const prodId = req.body.productId;
 
-  // Destroy metodu ile silme işlemi yapılır. Burada id'si prodId olan product silinir.
-  Product.deleteById(prodId)
-    .then(() => {
-      console.log("Deleted Product");
-      res.redirect("/admin/products");
-    })
-    .catch((err) => {
-      console.log(err);
-    });
+    // Silme işlemi
+    await Product.findByIdAndDelete(prodId);
+
+    console.log("Deleted Product");
+    res.redirect("/admin/products");
+  } catch (error) {
+    console.error("Error deleting product:", error);
+    // Hata durumunda kullanıcıya bilgi verilebilir veya loglanabilir
+    res.status(500).send("Internal Server Error"); // Örnek: 500 Internal Server Error
+  }
 };

@@ -2,7 +2,7 @@ const Product = require("../models/product");
 
 
 exports.getProduct = (req, res, next) => {
-  Product.fetchAll()
+  Product.find()
     .then((result) => {
       res.render("shop/product-list", {
         prods: result,
@@ -42,23 +42,10 @@ exports.getProductDetail = (req, res, next) => {
       // veya res.render('error', { pageTitle: 'Hata', errorMessage: 'Beklenmeyen bir hata oluştu.' });
     });
 
-  // İkinci yol
-  // modelProduct
-  //   .findAll({ where: { id: productId } })
-  //   .then((result) => {
-  //     res.render("shop/product-detail", {
-  //       product: result[0],
-  //       pageTitle: result[0].title,
-  //       path: "/products",
-  //     });
-  //   })
-  //   .catch((err) => {
-  //     console.log(err);
-  //   });
 };
 
 exports.getIndex = (req, res, next) => {
-  Product.fetchAll()
+  Product.find()
     .then((result) => {
       res.render("shop/index", {
         prods: result,
@@ -91,12 +78,11 @@ exports.postCart = (req, res, next) => {
       // Burada addToCart methodunu kullanmamızın sebebi, bu methodun içinde cartItem'ı kontrol ediyoruz.
       return req.user.addToCart(product);
     })
-    .then((result) => {
+    .then(() => {
       res.redirect("/cart");
     })
     .catch((err) => console.log(err));
 
-  // const productId = req.body.productId;
   // let fetchedCart;
   // let newQuantity = 1;
 
