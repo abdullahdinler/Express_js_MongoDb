@@ -21,10 +21,14 @@
             <h2 class="product__price">$<%= prods.price %></h2>
             <p class="product__description"><%= prods.description %></p>
           </div>
-          <div class="card__actions">
+         
+          <div class="card__actions"> 
             <a class="btn" href="/products/<%= prods._id %>">Detail</a>
+            <% if(isAuthenticated) { %>
             <%- include('../includes/add-to-cart.ejs', {product: prods}) %>
+            <% } %>
           </div>
+          
         </article>
         <% }); %>
       </div>

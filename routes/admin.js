@@ -1,7 +1,5 @@
 const express = require('express');
 const router = express.Router();
-const path = require('path');
-const rootDir = require('../util/path');
 const adminControler = require('../controllers/admin');
 
 router.get('/products', adminControler.getProducts);
