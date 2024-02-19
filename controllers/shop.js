@@ -8,8 +8,7 @@ exports.getProduct = (req, res, next) => {
       res.render("shop/product-list", {
         prods: result,
         pageTitle: "All Products",
-        path: "/products",
-        isAuthenticated: req.session.isLoggedIn
+        path: "/products"
       });
     })
     .catch((err) => {
@@ -36,7 +35,6 @@ exports.getProductDetail = (req, res, next) => {
         product: product,
         pageTitle: product.title,
         path: "/products",
-        isAuthenticated: req.session.isLoggedIn
       });
     })
     .catch((err) => {
@@ -52,8 +50,7 @@ exports.getIndex = (req, res, next) => {
       res.render("shop/index", {
         prods: result,
         pageTitle: "Shop",
-        path: "/",
-        isAuthenticated: req.session.isLoggedIn
+        path: "/"
       });
     })
     .catch((err) => {
@@ -84,8 +81,7 @@ exports.getCart = async (req, res, next) => {
     res.render("shop/cart", {
       pageTitle: "Cart",
       path: "/cart",
-      products: products,
-      isAuthenticated: req.session.isLoggedIn
+      products: products
     });
   } catch (error) {
     // Hata durumunda hatayı logla ve 500 Internal Server Error gönder
@@ -105,7 +101,6 @@ exports.postCart = (req, res, next) => {
       res.redirect("/cart");
     })
     .catch((err) => console.log(err));
-
 };
 
 exports.postOrder = async (req, res, next) => {
@@ -124,7 +119,7 @@ exports.postOrder = async (req, res, next) => {
     const order = new Order({
       products: products,
       user: {
-        name: user.name, // this.name yerine user.name kullanılmalı
+        email: req.user.email, // this.name yerine user.name kullanılmalı
         userId: userId, // this._id yerine userId kullanılmalı
       },
     });
@@ -152,7 +147,6 @@ exports.getOrders = async (req, res, next) => {
       pageTitle: "Orders",
       path: "/orders",
       orders: orders,
-      isAuthenticated: req.session.isLoggedIn
     });
   } catch (error) {
     console.error("Error creating order:", error);
@@ -164,7 +158,6 @@ exports.getCheckout = (req, res, next) => {
   res.render("shop/checkout", {
     pageTitle: "Checkout",
     path: "/checkout",
-    isAuthenticated: req.session.isLoggedIn
   });
 };
 
